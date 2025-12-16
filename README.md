@@ -1,6 +1,6 @@
 # OrpheusVPN
 
-Below is a **clean, production-ready VLESS server setup using Docker**, with **automatic updates via Watchtower**.
+It's a **clean, production-ready VLESS server setup using Docker**, with **automatic updates via Watchtower**.
 This setup uses **Xray-core** (recommended for VLESS) and supports **TCP + Reality** (most common today). You can adapt it to WS/TLS if needed.
 
 ---
