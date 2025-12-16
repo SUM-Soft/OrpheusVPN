@@ -37,6 +37,7 @@ jobs:
     - name: Configure Server
       run: |
         cat > .env <<EOF
+        COMPOSE_PROJECT_NAME=orpheus-vpn
         UUID=${{ env.UUID }}
         PRIVATE_KEY=${{ env.PRIVATE_KEY }}
         SERVER_NAME=www.google.com
@@ -105,9 +106,9 @@ jobs:
     - name: Start Client
       run: |
         # Run another xray container as client, linked to the server network
-        # Network name defaults to directory name (lowercase) + _default if not specified
+        # Network name is project_name + _default (orpheus-vpn_default)
         docker run -d --name client \
-          --network orpheusvpn_default \
+          --network orpheus-vpn_default \
           -v $(pwd)/client.json:/etc/xray/config.json \
           teddysun/xray:latest
         
