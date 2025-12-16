@@ -13,11 +13,3 @@ updates:
       interval: "weekly"
       day: "sunday"
       time: "02:00"
-
-  # Maintain dependencies for Docker
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "03:00"
