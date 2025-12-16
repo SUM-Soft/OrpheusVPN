@@ -1,0 +1,42 @@
+{
+  "log": {
+    "access": "/logs/access.log",
+    "error": "/logs/error.log",
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "${UUID}",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "${SERVER_NAME}:443",
+          "xver": 0,
+          "serverNames": [
+            "${SERVER_NAME}"
+          ],
+          "privateKey": "${PRIVATE_KEY}",
+          "shortIds": ["a1b2c3"]
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}

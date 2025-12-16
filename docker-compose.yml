@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  xray:
+    image: teddysun/xray:latest
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - ./config.json:/etc/xray/config.json
+      - ./logs:/logs
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ} # Timezone
+      - UUID=${UUID} # Reference UUID from .env file
+      - PRIVATE_KEY=${PRIVATE_KEY} # Reference private key from .env file
+      - SERVER_NAME=${SERVER_NAME} # Reference server name from .env file
+    command: /bin/sh -c "apk add --no-cache gettext && envsubst < /etc/xray/config.json > /etc/xray/config.run.json && xray run -config /etc/xray/config.run.json"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_SCHEDULE=${WATCHTOWER_SCHEDULE} # Reference update schedule
+      - TZ=${TZ}
+    command: --cleanup
