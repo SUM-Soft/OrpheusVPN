@@ -1,6 +1,6 @@
 {
   "log": {
-    "access": "/logs/access.log",
+    "access": "none",
     "error": "/logs/error.log",
     "loglevel": "warning"
   },
