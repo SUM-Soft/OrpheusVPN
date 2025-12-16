@@ -5,7 +5,7 @@ This setup uses **Xray-core** (recommended for VLESS) and supports **TCP + Reali
 
 ---
 
-## 1️⃣ Prerequisites
+## Prerequisites
 
 * Linux VPS (Ubuntu 20.04+ recommended)
 * A domain name (optional but recommended)
@@ -15,13 +15,13 @@ curl -fsSL https://get.docker.com | sh
 apt install docker-compose -y
 ```
 
-## 2️⃣ Directory Structure
+## Directory Structure
 ```bash
-mkdir -p /opt/xray/logs
-cd /opt/xray
+mkdir -p /opt/orpheus-vpn/logs
+cd /opt/orpheus-vpn
 ```
 
-## 3️⃣ Generate UUID & Reality Keys
+## Generate UUID & Reality Keys
 ```bash
 docker run --rm teddysun/xray xray uuid
 docker run --rm teddysun/xray xray x25519
@@ -30,12 +30,12 @@ Replace in .env file:
 * `your-unique-uuid-here`
 * `your-reality-private-key-here`
 
-## 4️⃣ Start the Server
+## Start the Server
 ```bash
 docker-compose up -d
 ```
 
-## 5️⃣ Client VLESS Example (Reality)
+## Client VLESS Example (Reality)
 ```
 vless://UUID@SERVER_IP:443?
 encryption=none
@@ -48,7 +48,7 @@ encryption=none
 &type=tcp
 ```
 
-## 6️⃣ Firewall (Important)
+## Firewall (Important)
 ```bash
 ufw allow 443/tcp
 ufw allow ssh
