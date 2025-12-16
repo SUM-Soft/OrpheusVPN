@@ -105,8 +105,9 @@ jobs:
     - name: Start Client
       run: |
         # Run another xray container as client, linked to the server network
+        # Network name defaults to directory name (lowercase) + _default if not specified
         docker run -d --name client \
-          --network orpheus-vpn-test_default \
+          --network orpheusvpn_default \
           -v $(pwd)/client.json:/etc/xray/config.json \
           teddysun/xray:latest
         
@@ -132,7 +133,7 @@ jobs:
         fi
 
     - name: Clean up
-      if: always
+      if: always()
       run: |
         docker compose down
         docker rm -f client || true
