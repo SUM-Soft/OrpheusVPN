@@ -25,4 +25,6 @@ services:
     environment:
       - WATCHTOWER_SCHEDULE=${WATCHTOWER_SCHEDULE} # Reference update schedule
       - TZ=${TZ}
-    command: --cleanup
+    command: --no-color --cleanup --label-enable
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
