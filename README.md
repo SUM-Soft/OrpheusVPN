@@ -1,5 +1,6 @@
 # OrpheusVPN
-![OrpheusVPN CI](https://github.com/SUM-Soft/OrpheusVPN/actions/workflows/ci.yml/badge.svg)
+[![Pipeline](https://github.com/SUM-Soft/OrpheusVPN/actions/workflows/pipeline.yml/badge.svg)](https://github.com/SUM-Soft/OrpheusVPN/actions/workflows/pipeline.yml)
+[![Connection Test](https://github.com/SUM-Soft/OrpheusVPN/actions/workflows/test.yml/badge.svg)](https://github.com/SUM-Soft/OrpheusVPN/actions/workflows/test.yml)
 
 It's a **clean, production-ready VLESS server setup using Docker**, with **automatic updates via Watchtower**.
 This setup uses **Xray-core** (recommended for VLESS) and supports **TCP + Reality** (most common today). You can adapt it to WS/TLS if needed.
