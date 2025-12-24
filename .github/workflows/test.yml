@@ -1,0 +1,137 @@
+name: Connection Test
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_call:
+
+jobs:
+  test-connection:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Generate Xray Keys
+        id: keys
+        run: |
+          # Use the same image as the server to generate keys
+          docker pull teddysun/xray:latest
+          
+          # Generate keys
+          docker run --rm teddysun/xray:latest xray x25519 > keys.txt
+          PRIVATE_KEY=$(grep "Private" keys.txt | awk '{print $2}')
+          PUBLIC_KEY=$(grep "Password" keys.txt | awk '{print $2}')
+          UUID=$(docker run --rm teddysun/xray:latest xray uuid)
+          
+          echo "PRIVATE_KEY=$PRIVATE_KEY" >> $GITHUB_ENV
+          echo "PUBLIC_KEY=$PUBLIC_KEY" >> $GITHUB_ENV
+          echo "UUID=$UUID" >> $GITHUB_ENV
+          
+          echo "Generated UUID: $UUID"
+          echo "Generated Public Key: $PUBLIC_KEY"
+
+      - name: Configure Server
+        run: |
+          cat > .env <<EOF
+          COMPOSE_PROJECT_NAME=orpheus-vpn
+          UUID=${{ env.UUID }}
+          PRIVATE_KEY=${{ env.PRIVATE_KEY }}
+          SERVER_NAME=www.google.com
+          WATCHTOWER_SCHEDULE=0 0 4 * * *
+          TZ=UTC
+          EOF
+
+      - name: Start Server
+        run: |
+          docker compose up -d --wait
+
+      - name: Check Server Logs
+        run: docker compose logs xray
+
+      - name: Generate Client Config
+        run: |
+          # We use the same server image for the client, just different config
+          cat > client.json <<EOF
+          {
+            "log": { "loglevel": "warning" },
+            "inbounds": [
+              {
+                "port": 10808,
+                "protocol": "socks",
+                "settings": { "auth": "noauth" },
+                "sniffing": { "enabled": true, "destOverride": ["http", "tls"] }
+              }
+            ],
+            "outbounds": [
+              {
+                "protocol": "vless",
+                "settings": {
+                  "vnext": [
+                    {
+                      "address": "xray", 
+                      "port": 443,
+                      "users": [
+                        {
+                          "id": "${{ env.UUID }}",
+                          "flow": "xtls-rprx-vision",
+                          "encryption": "none"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "show": false,
+                    "fingerprint": "chrome",
+                    "serverName": "www.google.com",
+                    "publicKey": "${{ env.PUBLIC_KEY }}",
+                    "shortId": "a1b2c3",
+                    "spiderX": ""
+                  }
+                }
+              },
+              { "protocol": "freedom", "tag": "direct" }
+            ]
+          }
+          EOF
+
+      - name: Start Client
+        run: |
+          # Run another xray container as client, linked to the server network
+          # Network name is project_name + _default (orpheus-vpn_default)
+          docker run -d --name client \
+            --network orpheus-vpn_default \
+            -v $(pwd)/client.json:/etc/xray/config.json \
+            teddysun/xray:latest
+          
+          # Wait for client to be ready by checking for the log message
+          timeout 30s bash -c 'until docker logs client | grep "app/proxyman/inbound: connection ends"; do sleep 1; done'
+
+      - name: Test Connectivity
+        run: |
+          # Run curl from inside the client container (or another container on simple network)
+          # Using the client container itself since it has shell and hopefully curl (alpine based)
+          
+          docker exec client apk add --no-cache curl
+          
+          # Test connection through local SOCKS5 proxy
+          resp=$(docker exec client curl -s -o /dev/null -w "%{http_code}" --socks5 127.0.0.1:10808 https://www.google.com)
+          
+          echo "Response code: $resp"
+          
+          if [ "$resp" -eq "200" ] || [ "$resp" -eq "301" ] || [ "$resp" -eq "302" ]; then
+            echo "Connection Successful!"
+          else
+            echo "Connection Failed!"
+            exit 1
+          fi
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker compose down
+          docker rm -f client || true
