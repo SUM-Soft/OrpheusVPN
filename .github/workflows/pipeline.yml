@@ -1,4 +1,4 @@
-name: OrpheusVPN CI
+name: Pipeline
 
 on:
   push:
