@@ -108,8 +108,9 @@ jobs:
             -v $(pwd)/client.json:/etc/xray/config.json \
             teddysun/xray:latest
           
-          # Wait for client to be ready by checking for the log message
-          timeout 30s bash -c 'until docker logs client | grep "app/proxyman/inbound: connection ends"; do sleep 1; done'
+          # Install tools and wait for client to be ready
+          docker exec client apk add --no-cache net-tools curl
+          timeout 30s bash -c 'until docker exec client netstat -ltn | grep -q 10808; do sleep 1; done'
 
       - name: Test Connectivity
         run: |
