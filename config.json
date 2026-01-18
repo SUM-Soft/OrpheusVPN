@@ -28,7 +28,9 @@
             "${SERVER_NAME}"
           ],
           "privateKey": "${PRIVATE_KEY}",
-          "shortIds": ["a1b2c3"]
+          "shortIds": [
+            "${SHORT_IDS}"
+          ]
         }
       }
     }

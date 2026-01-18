@@ -23,13 +23,16 @@ jobs:
           PRIVATE_KEY=$(grep "Private" keys.txt | awk '{print $2}')
           PUBLIC_KEY=$(grep "Password" keys.txt | awk '{print $2}')
           UUID=$(docker run --rm teddysun/xray:latest xray uuid)
+          SHORT_ID=$(openssl rand -hex 4)
           
           echo "PRIVATE_KEY=$PRIVATE_KEY" >> $GITHUB_ENV
           echo "PUBLIC_KEY=$PUBLIC_KEY" >> $GITHUB_ENV
           echo "UUID=$UUID" >> $GITHUB_ENV
+          echo "SHORT_ID=$SHORT_ID" >> $GITHUB_ENV
           
           echo "Generated UUID: $UUID"
           echo "Generated Public Key: $PUBLIC_KEY"
+          echo "Generated Short ID: $SHORT_ID"
 
       - name: Configure Server
         run: |
@@ -38,6 +41,7 @@ jobs:
           UUID=${{ env.UUID }}
           PRIVATE_KEY=${{ env.PRIVATE_KEY }}
           SERVER_NAME=www.google.com
+          SHORT_IDS=${{ env.SHORT_ID }}
           WATCHTOWER_SCHEDULE=0 0 4 * * *
           TZ=UTC
           EOF
@@ -89,7 +93,7 @@ jobs:
                     "fingerprint": "chrome",
                     "serverName": "www.google.com",
                     "publicKey": "${{ env.PUBLIC_KEY }}",
-                    "shortId": "a1b2c3",
+                    "shortId": "${{ env.SHORT_ID }}",
                     "spiderX": ""
                   }
                 }
